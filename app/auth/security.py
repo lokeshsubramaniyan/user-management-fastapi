@@ -5,18 +5,11 @@ This module provides functions for password hashing, JWT token creation
 and verification, and access control functionality.
 """
 
-import os
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
-from dotenv import load_dotenv
 from fastapi import HTTPException
-
-load_dotenv()
-
-SECRET_KEY = os.getenv('SECRET_KEY')
-ALGORITHM = os.getenv('ALGORITHM')
-ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
+from app.constants.constants import *
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -43,7 +36,12 @@ def verify_password(plain_password: str, hashed_password: str):
     Returns:
         bool: True if the password matches, False otherwise.
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    if not plain_password or not hashed_password:
+        return False
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception:
+        return False
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     """
@@ -71,6 +69,8 @@ def verify_token(token: str):
     Returns:
         dict or None: The decoded payload if valid, None otherwise.
     """
+    if not token:
+        return None
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload

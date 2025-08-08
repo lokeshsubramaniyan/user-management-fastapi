@@ -24,3 +24,16 @@ def credential_data_update(credential):
         'notes': credential.notes,
         'updated_at': credential.updated_at
     }
+
+def credential_data_response(credential):
+    return {
+        'id': str(credential['_id']),
+        'title': credential['title'],
+        'username': credential['username'],
+        'password': credential['password'],
+        'url': credential['url'],
+        'notes': credential['notes']
+    } if credential else None
+
+def all_credential(credentials):
+    return [credential_data_response(credential) for credential in credentials]

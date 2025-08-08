@@ -6,6 +6,9 @@ including field mappings, sort types, search types, and validation fields.
 """
 
 from app.schemas.userSchema import User
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 ID_MAP = {
     'id': '_id',
@@ -19,6 +22,10 @@ SORT_TYPE_FIELD = 'sort_type'
 SEARCH_BY_FIELD = 'search_by'
 SEARCH_VALUE_FIELD = 'search_value'
 VALIDATION_FIELDS = User.__dict__['__annotations__'].keys()
+
+SECRET_KEY = os.getenv('SECRET_KEY')
+ALGORITHM = os.getenv('ALGORITHM')
+ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
 
 
 

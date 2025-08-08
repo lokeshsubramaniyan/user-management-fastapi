@@ -64,7 +64,7 @@ class UserCrud:
             Exception: If an error occurs during user creation.
         """
         try:
-            response = user_collection.insert_one(user)
+            response = self.user_collection.insert_one(user)
             logger.info(f'User created successfully')
             return str(response.inserted_id)
         except Exception as e:
@@ -83,7 +83,7 @@ class UserCrud:
         Returns:
             list: List of user documents matching the criteria.
         """
-        users = user_collection.find({'is_deleted': False, **filter_params}).sort(sort_by, sort_order)
+        users = self.user_collection.find({'is_deleted': False, **filter_params}).sort(sort_by, sort_order)
         return self.all_user(users)
 
     def get_user_by_id(self, id):
@@ -114,9 +114,11 @@ class UserCrud:
         """
         try:
             user.updated_at = int(datetime.timestamp(datetime.now()))
-            response = user_collection.update_one(
+            user_data = dict(user)
+            
+            response = self.user_collection.update_one(
                 {'_id': id}, 
-                {'$set': dict(user)}
+                {'$set': user_data}
             )
             logger.info(f'User successfully updated for user id: {id}')
             return response

@@ -20,3 +20,11 @@ class UpdateCredential(BaseModel):
     is_deleted: bool = False
     updated_at: int = int(datetime.timestamp(datetime.now()))
 
+class CredentialResponse(BaseModel):
+    id: str
+    title: str
+    username: str
+    password: str
+    url: str = None
+    notes: str = None
+
