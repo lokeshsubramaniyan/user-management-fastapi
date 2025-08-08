@@ -1,0 +1,9 @@
+fastapi
+pydantic
+python-dotenv
+pymongo
+passlib[bcrypt]
+python-jose
+bson
+python-multipart
+httpx
