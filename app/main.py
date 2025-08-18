@@ -7,19 +7,20 @@ and includes all the API routers.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from dotenv import load_dotenv
-from logging.config import dictConfig
+
 from app.api import users
 from app.api import credential
+from app.core.middleware import TransactionIdMiddleware, RateLimitMiddleware
+from app.core.util import lifespan
 
 load_dotenv()
 
-# Create FastAPI application instance
 app = FastAPI(
     title="User Management API",
     description="A FastAPI application for user management with JWT authentication",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 app.add_middleware(
     CORSMiddleware,
@@ -27,27 +28,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(TransactionIdMiddleware)
+app.add_middleware(RateLimitMiddleware)
 
 app.include_router(users.router, prefix='/api/users')
 app.include_router(credential.router, prefix='/api/credential')
-    
-dictConfig({
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "default": {
-            "format": "%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-        },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "default",
-        },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "DEBUG",
-    },
-})
 

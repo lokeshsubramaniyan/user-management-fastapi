@@ -5,7 +5,7 @@ This module provides functions for converting user documents between
 database format and API response format.
 """
 
-from app.db_config import db
+from app.core.db_config import db
 
 user_collection = db.get_collection('user_data')
 

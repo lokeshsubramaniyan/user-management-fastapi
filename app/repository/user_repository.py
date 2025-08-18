@@ -5,14 +5,14 @@ This module provides the UserCrud class for handling all database
 operations related to user management including create, read, update, and delete.
 """
 
-import logging
 from datetime import datetime
 
+from app.core.logger import CustomLogger
 from app.models.user import user_collection, all_user
 
-logger = logging.getLogger('user_crud')
+logger = CustomLogger('user_repository')
 
-class UserCrud:
+class UserRepository:
     """
     CRUD operations class for user management in the database.
     
@@ -44,7 +44,7 @@ class UserCrud:
             user = self.user_collection.find_one(
                 {**user_details, 'is_deleted': False}
             )
-            logger.info(f'User successfully fetched for user id: {id}')
+            logger.info(f'User successfully fetched for user details: {user_details}')
             return user
         except Exception as e:
             logger.error(f'Error occur while getting user by id: {e}')
@@ -65,7 +65,7 @@ class UserCrud:
         """
         try:
             response = self.user_collection.insert_one(user)
-            logger.info(f'User created successfully')
+            logger.info(f'User created successfully for user id: {str(response.inserted_id)}')
             return str(response.inserted_id)
         except Exception as e:
             logger.error(f'Error occure while creating user: {e}')
@@ -84,6 +84,7 @@ class UserCrud:
             list: List of user documents matching the criteria.
         """
         users = self.user_collection.find({'is_deleted': False, **filter_params}).sort(sort_by, sort_order)
+        logger.info(f'Users fetched successfully for params: {sort_by}, {sort_order}, {filter_params}, user count: {users.count()}')
         return self.all_user(users)
 
     def get_user_by_id(self, id):
@@ -120,7 +121,7 @@ class UserCrud:
                 {'_id': id}, 
                 {'$set': user_data}
             )
-            logger.info(f'User successfully updated for user id: {id}')
+            logger.info(f'User successfully updated for user id: {id}, updated user data: {user_data}')
             return response
         except Exception as e:
             logger.error(f'Error occur while updating user by id: {e}')

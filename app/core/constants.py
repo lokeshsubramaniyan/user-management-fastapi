@@ -26,13 +26,7 @@ VALIDATION_FIELDS = User.__dict__['__annotations__'].keys()
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM')
 ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
-
-
-
-SEARCH_TYPE_FIELD = 'search_type'
-SEARCH_TYPE_EXACT = 'exact'
-SEARCH_TYPE_PARTIAL = 'partial'
-SEARCH_TYPE_REGEX = 'regex'
-SEARCH_TYPE_WILDCARD = 'wildcard'
-SEARCH_TYPE_FUZZY = 'fuzzy'
-SEARCH_TYPE_PHONETIC = 'phonetic'
+REDIS_URL = os.getenv('REDIS_URL')
+RATE_LIMIT_OTHER = int(os.getenv('RATE_LIMIT_OTHER', 40))
+RATE_LIMIT_POST = int(os.getenv('RATE_LIMIT_POST', 2))
+WINDOW = int(os.getenv('WINDOW', 60))

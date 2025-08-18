@@ -6,7 +6,10 @@ This module contains utility functions used throughout the application
 for parameter processing and other common operations.
 """
 
-from app.constants.constants import *
+from app.core.constants import *
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from redis import asyncio as aioredis
 
 def get_params(params):
     """
@@ -29,3 +32,14 @@ def get_params(params):
     params.pop(SORT_BY_FIELD, None)
     params.pop(SORT_TYPE_FIELD, None)
     return sort_by, sort_type, params
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.redis = await aioredis.from_url(
+        REDIS_URL,
+        decode_responses=True
+    )
+    print('start:', app.state.redis)
+    yield
+    print('end:', app.state.redis)
+    await app.state.redis.close()

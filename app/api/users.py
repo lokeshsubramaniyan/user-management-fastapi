@@ -9,23 +9,23 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from bson.objectid import ObjectId
 from datetime import datetime
-import logging
 import traceback
 
 from app.models.user import user_data, all_user, user_collection
 from app.schemas.token import Token
 from app.schemas.userSchema import User, UpdateUser, UserLogin, UserResponse
 from app.services.user_service import (
-    UserService, is_duplicate_username, get_user, authorize
+    UserService, is_duplicate_username, get_user
 )
 from app.auth.security import (
-    verify_password, create_access_token, verify_token
+    verify_password, create_access_token, verify_token, authorize
 )
 from app.auth.auth_bearer import JWTBearer
-from app.constants.constants import *
-from app.utilities.util import get_params
+from app.core.constants import *
+from app.core.util import get_params
+from app.core.logger import CustomLogger
 
-logger = logging.getLogger('users')
+logger = CustomLogger('users')
 router = APIRouter()
 user_service = UserService()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
@@ -86,6 +86,7 @@ async def get_all_user(
     Returns:
         list[dict]: List of user data.
     """
+    print(request.client.host)
     sort_by, sort_type, filter_params = get_params(dict(request.query_params))
     return user_service.get_users(sort_by, sort_type, filter_params)
 

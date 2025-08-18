@@ -5,19 +5,18 @@ This module provides the UserService class and utility functions for
 user management business logic and operations.
 """
 
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException
 from bson.objectid import ObjectId
-import logging
-from datetime import datetime
 
-from app.models.user import user_collection, all_user, user_data
-from app.auth.security import hash_password, allow_access, authorize
+from app.models.user import user_data
+from app.auth.security import hash_password
 from app.schemas.userSchema import User
-from app.crud.user_crud import UserCrud
-from app.constants.constants import *
+from app.repository.user_repository import UserRepository
+from app.core.constants import *
+from app.core.logger import CustomLogger
 
-logger = logging.getLogger('user_service')
-user_crud = UserCrud()
+logger = CustomLogger('user_service')
+user_repository = UserRepository()
 
 def get_user(**user_details):
     """
@@ -33,7 +32,7 @@ def get_user(**user_details):
         Exception: If an error occurs during database query.
     """
     try:
-        return user_crud.get_user(**user_details)
+        return user_repository.get_user(**user_details)
     except Exception as e:
         logger.error(f'Error occur while getting user by id: {e}')
         raise
@@ -51,7 +50,7 @@ def is_duplicate_username(user: User):
     Raises:
         HTTPException: If the username already exists.
     """
-    existing_user = user_crud.get_user(**{'username': user.username})
+    existing_user = user_repository.get_user(**{'username': user.username})
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already exists")
     return user
@@ -61,7 +60,7 @@ class UserService:
     Service class for user management operations.
     """
     def __init__(self):
-        self.user_crud = user_crud
+        self.user_repository = user_repository
 
     def create_user(self, user: User):
         """
@@ -78,7 +77,7 @@ class UserService:
         """
         try:
             user.password = hash_password(user.password)
-            response = self.user_crud.create_user(dict(user))
+            response = self.user_repository.create_user(dict(user))
             return response
         except Exception as e:
             logger.error(f'Error occure while creating user: {e}')
@@ -99,7 +98,7 @@ class UserService:
         if ID_FIELD in filter_params:
             filter_params[MONGO_ID_FIELD] = ObjectId(filter_params[ID_FIELD])
             del filter_params[ID_FIELD]
-        users = self.user_crud.get_users(ID_MAP.get(sort_by, sort_by), sort_order, filter_params)
+        users = self.user_repository.get_users(ID_MAP.get(sort_by, sort_by), sort_order, filter_params)
         return users
     
     def get_user_by_id(self, id):
@@ -117,7 +116,7 @@ class UserService:
         """
         try:
             user_id = ObjectId(id)
-            user = self.user_crud.get_user_by_id(user_id)
+            user = self.user_repository.get_user_by_id(user_id)
             return user_data(user)
         except Exception as e:
             logger.error(f'Error occur while getting user by id: {e}')
@@ -139,10 +138,10 @@ class UserService:
         """
         try:
             user_id = ObjectId(id)
-            user_data = self.user_crud.get_user(**{'_id': user_id})
+            user_data = self.user_repository.get_user(**{'_id': user_id})
             if not user_data:
                 return user_data
-            response = self.user_crud.update_user_by_id(user_id, user)
+            response = self.user_repository.update_user_by_id(user_id, user)
             return response
         except Exception as e:
             logger.error(f'Error occur while updating user by id: {e}')
@@ -163,10 +162,10 @@ class UserService:
         """
         try:
             user_id = ObjectId(id)
-            user_data = self.user_crud.get_user(**{'_id': user_id})
+            user_data = self.user_repository.get_user(**{'_id': user_id})
             if not user_data:
                 return user_data
-            response = self.user_crud.delete_user_by_id(user_id)
+            response = self.user_repository.delete_user_by_id(user_id)
             return response
         except Exception as e:
             logger.error(f'Error occur while deleteing user by id: {e}')

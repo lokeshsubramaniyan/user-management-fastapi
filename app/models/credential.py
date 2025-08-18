@@ -1,4 +1,4 @@
-from app.db_config import db
+from app.core.db_config import db
 
 credential_collection = db.get_collection('credential_data')
 

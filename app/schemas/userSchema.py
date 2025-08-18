@@ -7,7 +7,7 @@ including User, UpdateUser, and UserLogin models.
 
 from pydantic import BaseModel, field_validator
 from datetime import datetime
-from app.db_config import db
+from app.core.db_config import db
 
 class User(BaseModel):
     """

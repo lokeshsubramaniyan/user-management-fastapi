@@ -1,12 +1,11 @@
-import logging
 from bson.objectid import ObjectId
 from fastapi import HTTPException
 
-from app.crud.credential_crud import CredentialCrud
-from app.crud.user_crud import UserCrud
-from app.constants.constants import *
+from app.repository.credential_repository import CredentialRepository
+from app.repository.user_repository import UserRepository
+from app.core.logger import CustomLogger
 
-logger = logging.getLogger('credential_service')
+logger = CustomLogger('credential_service')
 
 class CredentialService:
     """
@@ -22,8 +21,8 @@ class CredentialService:
         Initialize the CredentialService with instances of 
         CredentialCrud and UserCrud for data operations.
         """
-        self.credential_crud = CredentialCrud()
-        self.user_crud = UserCrud()
+        self.credential_repository = CredentialRepository()
+        self.user_repository = UserRepository()
 
     def create_credential(self, user_id, credential):
         """
@@ -42,7 +41,7 @@ class CredentialService:
         """
         try:
             self.get_user_data(user_id)
-            return self.credential_crud.create_credential(user_id, credential)
+            return self.credential_repository.create_credential(user_id, credential)
         except Exception as e:
             logger.error(f'Error occurred while creating credential: {e}')
             raise
@@ -65,7 +64,7 @@ class CredentialService:
         try:
             self.get_user_data(user_id)
             credential_id = ObjectId(credential_id)
-            credential_data = self.credential_crud.get_credential(
+            credential_data = self.credential_repository.get_credential(
                 user_id, 
                 {'_id': credential_id}
             )
@@ -91,7 +90,7 @@ class CredentialService:
         """
         try:
             self.get_user_data(user_id)
-            credential_data = self.credential_crud.get_credential(
+            credential_data = self.credential_repository.get_credential(
                 user_id, 
                 {'title': title}
             )
@@ -100,13 +99,13 @@ class CredentialService:
             logger.error(f'Error occurred while getting credential by title: {e}')
             raise
     
-    def get_all_credentials(self, user_id):
+    def get_all_credentials(self, user_id, search_value=None):
         """
         Retrieve all credentials for a specific user.
 
         Args:
             user_id (str): The ID of the user.
-
+            search_value (str): The value to search for in the credentials.
         Returns:
             list: A list of all credentials for the user.
 
@@ -116,7 +115,7 @@ class CredentialService:
         """
         try:
             self.get_user_data(user_id)
-            return self.credential_crud.get_all_credentials(user_id)
+            return self.credential_repository.get_all_credentials(user_id, search_value)
         except Exception as e:
             logger.error(f'Error occurred while getting all credentials: {e}')
             raise
@@ -140,13 +139,13 @@ class CredentialService:
         try:
             self.get_user_data(user_id)
             credential_id = ObjectId(credential_id)
-            credential_data = self.credential_crud.get_credential(
+            credential_data = self.credential_repository.get_credential(
                 user_id, 
                 {'_id': credential_id}
             )
             if not credential_data:
                 return None
-            return self.credential_crud.update_credential(
+            return self.credential_repository.update_credential(
                 user_id, 
                 credential_id, 
                 credential
@@ -173,13 +172,13 @@ class CredentialService:
         try:
             self.get_user_data(user_id)
             credential_id = ObjectId(credential_id)
-            credential_data = self.credential_crud.get_credential(
+            credential_data = self.credential_repository.get_credential(
                 user_id, 
                 {'_id': credential_id}
             )
             if not credential_data:
                 return None
-            return self.credential_crud.delete_credential(
+            return self.credential_repository.delete_credential(
                 user_id, 
                 credential_id
             )
@@ -203,7 +202,7 @@ class CredentialService:
         """
         try:
             user_id = ObjectId(user_id)
-            user_data = self.user_crud.get_user(**{'_id': user_id})
+            user_data = self.user_repository.get_user(**{'_id': user_id})
             if not user_data:
                 raise HTTPException(
                     status_code=404, 

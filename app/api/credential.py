@@ -1,11 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException
+
+from fastapi import APIRouter, Depends, HTTPException, Request
 from app.auth.security import authorize
 from app.auth.auth_bearer import JWTBearer
 from app.services.credential_service import CredentialService
 from app.schemas.credentialSchema import Credential
+from app.core.logger import CustomLogger
+from app.core.util import get_params
 
 router = APIRouter()
 credential_service = CredentialService()
+
+logger = CustomLogger('credential')
+
 
 @router.post('/{user_id}/user')
 async def create_credential(
@@ -34,6 +40,7 @@ async def create_credential(
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f'Error creating credential: {e}')
         raise HTTPException(
             status_code=500, 
             detail=f'Error creating credential: {e}'
@@ -76,6 +83,7 @@ async def get_credential(
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f'Error getting credential: {e}')
         raise HTTPException(
             status_code=500, 
             detail=f'Error getting credential: {e}'
@@ -118,6 +126,7 @@ async def get_credential_by_title(
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f'Error getting credential by title: {e}')
         raise HTTPException(
             status_code=500, 
             detail=f'Error getting credential by title: {e}'
@@ -125,6 +134,7 @@ async def get_credential_by_title(
 
 @router.get('/{user_id}/user')
 async def get_all_credentials(
+    request: Request,
     user_id: str, 
     user: dict = Depends(JWTBearer())
 ):
@@ -144,10 +154,12 @@ async def get_all_credentials(
     """
     try:
         authorize(user_id, user)
-        return credential_service.get_all_credentials(user_id)
+        search_value = request.query_params.get('search', None)
+        return credential_service.get_all_credentials(user_id, search_value)
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f'Error getting all credentials: {e}')
         raise HTTPException(
             status_code=500, 
             detail=f'Error getting all credentials: {e}'
@@ -193,6 +205,7 @@ async def update_credential(
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f'Error updating credential: {e}')
         raise HTTPException(
             status_code=500, 
             detail=f'Error updating credential: {e}'
@@ -235,6 +248,7 @@ async def delete_credential(
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f'Error deleting credential: {e}')
         raise HTTPException(
             status_code=500, 
             detail=f'Error deleting credential: {e}'

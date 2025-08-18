@@ -7,3 +7,8 @@ python-jose
 bson
 python-multipart
 httpx
+redis
+pytest
+pytest-asyncio
+pytest-cov
+pytest-mock

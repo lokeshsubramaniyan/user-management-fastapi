@@ -1,14 +1,12 @@
-import logging
-
 from app.models.credential import (
     credential_collection, credential_data, credential_data_update, all_credential,
     credential_data_response
 )
-from app.constants.constants import *
+from app.core.logger import CustomLogger
 
-logger = logging.getLogger('credential_crud')
+logger = CustomLogger('credential_repository')
 
-class CredentialCrud:
+class CredentialRepository:
     """
     CRUD operations handler for managing user credentials in the database.
     
@@ -46,7 +44,7 @@ class CredentialCrud:
                     credential
                 )
             )
-            logger.info(f'Credential created successfully')
+            logger.info(f'Credential created successfully for user_id: {user_id}, credential data: {credential_data(user_id, credential)}, credential id: {response.inserted_id}')
             return str(response.inserted_id)
         except Exception as e:
             logger.error(f'Error occurred while creating credential: {e}')
@@ -74,17 +72,19 @@ class CredentialCrud:
                     'is_deleted': False
                 }
             )
+            logger.info(f'Credential fetched successfully for user_id: {user_id}, credential query: {credential_query}')
             return self.credential_data_response(response)
         except Exception as e:
             logger.error(f'Error occurred while getting credential: {e}')
             raise
     
-    def get_all_credentials(self, user_id):
+    def get_all_credentials(self, user_id, search_value=None):
         """
         Retrieve all non-deleted credentials for a specific user.
 
         Args:
             user_id (str): The ID of the user whose credentials are being retrieved.
+            search_value (str): The value to search for in the credentials.
 
         Returns:
             list: A list of all credential data formatted for response.
@@ -93,12 +93,30 @@ class CredentialCrud:
             Exception: If an error occurs during the database query.
         """
         try:
-            response = credential_collection.find(
-                {
-                    'user_id': user_id, 
-                    'is_deleted': False
+            search_query = {
+                'user_id': user_id, 
+                'is_deleted': False
+            }
+            def get_filter_query(value):
+                return {
+                    '$or': [
+                        {
+                            'title': {
+                                '$regex': f'^{value}', 
+                                '$options': 'i'
+                            }
+                        },{
+                            'username': {
+                                '$regex': f'^{value}', 
+                                '$options': 'i'
+                            }
+                        }
+                    ]
                 }
-            )
+            if search_value:
+                search_query.update(get_filter_query(search_value))
+            response = credential_collection.find(search_query)
+            logger.info(f'All credentials fetched successfully for user_id: {user_id}, search value: {search_value}, credential count: {response.count()}')
             return self.all_credential(response)
         except Exception as e:
             logger.error(f'Error occurred while getting all credentials: {e}')
@@ -128,6 +146,7 @@ class CredentialCrud:
                     '$set': credential_data_update(credential)
                 }
             )
+            logger.info(f'Credential updated successfully for user_id: {user_id}, credential id: {credential_id}, credential data: {credential_data_update(credential)}')
             return response
         except Exception as e:
             logger.error(f'Error occurred while updating credential: {e}')
@@ -156,6 +175,7 @@ class CredentialCrud:
                     '$set': {'is_deleted': True}
                 }
             )
+            logger.info(f'Credential deleted successfully for user_id: {user_id}, credential id: {credential_id}')
             return response
         except Exception as e:
             logger.error(f'Error occurred while deleting credential: {e}')

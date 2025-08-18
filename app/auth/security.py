@@ -9,7 +9,7 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from fastapi import HTTPException
-from app.constants.constants import *
+from app.core.constants import *
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
