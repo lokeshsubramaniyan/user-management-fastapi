@@ -1,23 +1,20 @@
-
 from fastapi import APIRouter, Depends, HTTPException, Request
-from app.auth.security import authorize
+
 from app.auth.auth_bearer import JWTBearer
-from app.services.credential_service import CredentialService
-from app.schemas.credentialSchema import Credential
+from app.auth.security import authorize
 from app.core.logger import CustomLogger
-from app.core.util import get_params
+from app.schemas.credentialSchema import Credential
+from app.services.credential_service import CredentialService
 
 router = APIRouter()
 credential_service = CredentialService()
 
-logger = CustomLogger('credential')
+logger = CustomLogger("credential")
 
 
-@router.post('/{user_id}/user')
+@router.post("/{user_id}/user")
 async def create_credential(
-    user_id: str, 
-    credential: Credential, 
-    user: dict = Depends(JWTBearer())
+    user_id: str, credential: Credential, user: dict = Depends(JWTBearer())
 ):
     """
     Create a new credential for a specific user.
@@ -40,17 +37,13 @@ async def create_credential(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f'Error creating credential: {e}')
-        raise HTTPException(
-            status_code=500, 
-            detail=f'Error creating credential: {e}'
-        )
+        logger.error(f"Error creating credential: {e}")
+        raise HTTPException(status_code=500, detail=f"Error creating credential: {e}")
 
-@router.get('/{user_id}/user/{credential_id}')
+
+@router.get("/{user_id}/user/{credential_id}")
 async def get_credential(
-    user_id: str, 
-    credential_id: str, 
-    user: dict = Depends(JWTBearer())
+    user_id: str, credential_id: str, user: dict = Depends(JWTBearer())
 ):
     """
     Retrieve a specific credential by its ID for a user.
@@ -70,30 +63,23 @@ async def get_credential(
     """
     try:
         authorize(user_id, user)
-        credential = credential_service.get_credential_by_id(
-            user_id, 
-            credential_id
-        )
+        credential = credential_service.get_credential_by_id(user_id, credential_id)
         if not credential:
             raise HTTPException(
-                status_code=404, 
-                detail=f'Credential not found for credential_id: {credential_id}'
+                status_code=404,
+                detail=f"Credential not found for credential_id: {credential_id}",
             )
         return credential
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f'Error getting credential: {e}')
-        raise HTTPException(
-            status_code=500, 
-            detail=f'Error getting credential: {e}'
-        )
-    
-@router.get('/{user_id}/user/{title}/title')
+        logger.error(f"Error getting credential: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting credential: {e}")
+
+
+@router.get("/{user_id}/user/{title}/title")
 async def get_credential_by_title(
-    user_id: str, 
-    title: str, 
-    user: dict = Depends(JWTBearer())
+    user_id: str, title: str, user: dict = Depends(JWTBearer())
 ):
     """
     Retrieve a credential by its title for a user.
@@ -113,30 +99,24 @@ async def get_credential_by_title(
     """
     try:
         authorize(user_id, user)
-        credential = credential_service.get_credential_by_title(
-            user_id, 
-            title
-        )
+        credential = credential_service.get_credential_by_title(user_id, title)
         if not credential:
             raise HTTPException(
-                status_code=404, 
-                detail=f'Credential not found for title: {title}'
+                status_code=404, detail=f"Credential not found for title: {title}"
             )
         return credential
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f'Error getting credential by title: {e}')
+        logger.error(f"Error getting credential by title: {e}")
         raise HTTPException(
-            status_code=500, 
-            detail=f'Error getting credential by title: {e}'
+            status_code=500, detail=f"Error getting credential by title: {e}"
         )
 
-@router.get('/{user_id}/user')
+
+@router.get("/{user_id}/user")
 async def get_all_credentials(
-    request: Request,
-    user_id: str, 
-    user: dict = Depends(JWTBearer())
+    request: Request, user_id: str, user: dict = Depends(JWTBearer())
 ):
     """
     Retrieve all credentials for a specific user.
@@ -154,23 +134,23 @@ async def get_all_credentials(
     """
     try:
         authorize(user_id, user)
-        search_value = request.query_params.get('search', None)
+        search_value = request.query_params.get("search", None)
         return credential_service.get_all_credentials(user_id, search_value)
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f'Error getting all credentials: {e}')
+        logger.error(f"Error getting all credentials: {e}")
         raise HTTPException(
-            status_code=500, 
-            detail=f'Error getting all credentials: {e}'
+            status_code=500, detail=f"Error getting all credentials: {e}"
         )
 
-@router.put('/{user_id}/user/{credential_id}/update')
+
+@router.put("/{user_id}/user/{credential_id}/update")
 async def update_credential(
-    user_id: str, 
-    credential_id: str, 
-    credential: Credential, 
-    user: dict = Depends(JWTBearer())
+    user_id: str,
+    credential_id: str,
+    credential: Credential,
+    user: dict = Depends(JWTBearer()),
 ):
     """
     Update an existing credential for a specific user.
@@ -192,30 +172,24 @@ async def update_credential(
     try:
         authorize(user_id, user)
         credential_data = credential_service.update_credential(
-            user_id, 
-            credential_id, 
-            credential
+            user_id, credential_id, credential
         )
         if not credential_data:
             raise HTTPException(
-                status_code=404, 
-                detail=f'Credential not found for credential_id: {credential_id}'
+                status_code=404,
+                detail=f"Credential not found for credential_id: {credential_id}",
             )
         return credential_data
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f'Error updating credential: {e}')
-        raise HTTPException(
-            status_code=500, 
-            detail=f'Error updating credential: {e}'
-        )
+        logger.error(f"Error updating credential: {e}")
+        raise HTTPException(status_code=500, detail=f"Error updating credential: {e}")
 
-@router.delete('/{user_id}/user/{credential_id}/delete')
+
+@router.delete("/{user_id}/user/{credential_id}/delete")
 async def delete_credential(
-    user_id: str, 
-    credential_id: str, 
-    user: dict = Depends(JWTBearer())
+    user_id: str, credential_id: str, user: dict = Depends(JWTBearer())
 ):
     """
     Soft delete a credential for a specific user.
@@ -235,21 +209,15 @@ async def delete_credential(
     """
     try:
         authorize(user_id, user)
-        credential_data = credential_service.delete_credential(
-            user_id, 
-            credential_id
-        )
+        credential_data = credential_service.delete_credential(user_id, credential_id)
         if not credential_data:
             raise HTTPException(
-                status_code=404, 
-                detail=f'Credential not found for credential_id: {credential_id}'
+                status_code=404,
+                detail=f"Credential not found for credential_id: {credential_id}",
             )
         return credential_data
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f'Error deleting credential: {e}')
-        raise HTTPException(
-            status_code=500, 
-            detail=f'Error deleting credential: {e}'
-        )
+        logger.error(f"Error deleting credential: {e}")
+        raise HTTPException(status_code=500, detail=f"Error deleting credential: {e}")

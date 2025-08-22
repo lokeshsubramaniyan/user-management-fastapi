@@ -5,28 +5,31 @@ This module contains all the constant values used throughout the application
 including field mappings, sort types, search types, and validation fields.
 """
 
-from app.schemas.userSchema import User
 import os
+
 from dotenv import load_dotenv
+
+from app.schemas.userSchema import User
+
 load_dotenv()
 
 ID_MAP = {
-    'id': '_id',
+    "id": "_id",
 }
-ID_FIELD = 'id'
-MONGO_ID_FIELD = '_id'
-SORT_TYPE_ASC = 'asc'
-SORT_TYPE_DESC = 'desc'
-SORT_BY_FIELD = 'sort_by'
-SORT_TYPE_FIELD = 'sort_type'
-SEARCH_BY_FIELD = 'search_by'
-SEARCH_VALUE_FIELD = 'search_value'
-VALIDATION_FIELDS = User.__dict__['__annotations__'].keys()
+ID_FIELD = "id"
+MONGO_ID_FIELD = "_id"
+SORT_TYPE_ASC = "asc"
+SORT_TYPE_DESC = "desc"
+SORT_BY_FIELD = "sort_by"
+SORT_TYPE_FIELD = "sort_type"
+SEARCH_BY_FIELD = "search_by"
+SEARCH_VALUE_FIELD = "search_value"
+VALIDATION_FIELDS = User.__dict__["__annotations__"].keys()
 
-SECRET_KEY = os.getenv('SECRET_KEY')
-ALGORITHM = os.getenv('ALGORITHM')
-ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
-REDIS_URL = os.getenv('REDIS_URL')
-RATE_LIMIT_OTHER = int(os.getenv('RATE_LIMIT_OTHER', 40))
-RATE_LIMIT_POST = int(os.getenv('RATE_LIMIT_POST', 2))
-WINDOW = int(os.getenv('WINDOW', 60))
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 0)
+REDIS_URL = os.getenv("REDIS_URL")
+RATE_LIMIT_OTHER = int(os.getenv("RATE_LIMIT_OTHER", 40))
+RATE_LIMIT_POST = int(os.getenv("RATE_LIMIT_POST", 2))
+WINDOW = int(os.getenv("WINDOW", 60))

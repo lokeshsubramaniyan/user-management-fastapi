@@ -7,7 +7,8 @@ database format and API response format.
 
 from app.core.db_config import db
 
-user_collection = db.get_collection('user_data')
+user_collection = db.get_collection("user_data")
+
 
 def user_data(user):
     """
@@ -20,14 +21,18 @@ def user_data(user):
         dict: A dictionary containing user id, name, email_id, and date_of_birth.
               Returns an empty dictionary if user is None.
     """
-    return {
-        'id': str(user['_id']),
-        'username': user['username'],
-        'name': user['name'],
-        'email_id': user['email_id'],
-        'date_of_birth': user['date_of_birth']
-    } if user else {}
-        
+    return (
+        {
+            "id": str(user["_id"]),
+            "username": user["username"],
+            "name": user["name"],
+            "email_id": user["email_id"],
+            "date_of_birth": user["date_of_birth"],
+        }
+        if user
+        else {}
+    )
+
 
 def all_user(users):
     """

@@ -5,13 +5,16 @@ This module provides functions for password hashing, JWT token creation
 and verification, and access control functionality.
 """
 
-from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
-from jose import JWTError, jwt
+
 from fastapi import HTTPException
-from app.core.constants import *
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+
+from app.core.constants import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 def hash_password(password: str):
     """
@@ -24,6 +27,7 @@ def hash_password(password: str):
         str: The hashed password.
     """
     return pwd_context.hash(password)
+
 
 def verify_password(plain_password: str, hashed_password: str):
     """
@@ -43,6 +47,7 @@ def verify_password(plain_password: str, hashed_password: str):
     except Exception:
         return False
 
+
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     """
     Create a JWT access token.
@@ -55,9 +60,12 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
         str: The encoded JWT token.
     """
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES)))
+    expire = datetime.now(timezone.utc) + (
+        expires_delta or timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
+    )
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
 
 def verify_token(token: str):
     """
@@ -76,7 +84,8 @@ def verify_token(token: str):
         return payload
     except JWTError:
         return None
-    
+
+
 def allow_access(id, current_user):
     """
     Check if the current user is allowed to access the resource.
@@ -88,9 +97,10 @@ def allow_access(id, current_user):
     Returns:
         bool: True if access is allowed, False otherwise.
     """
-    if id != current_user.get('id', ''):
+    if id != current_user.get("id", ""):
         return False
     return True
+
 
 def authorize(id, current_user):
     """
@@ -107,5 +117,5 @@ def authorize(id, current_user):
         HTTPException: If the user is not authorized.
     """
     if not allow_access(id, current_user):
-        raise HTTPException(status_code=401, detail='Unauthorised action')
+        raise HTTPException(status_code=401, detail="Unauthorised action")
     return current_user

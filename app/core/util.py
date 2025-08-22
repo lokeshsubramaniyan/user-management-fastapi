@@ -1,4 +1,3 @@
-
 """
 Utility functions module.
 
@@ -6,21 +5,30 @@ This module contains utility functions used throughout the application
 for parameter processing and other common operations.
 """
 
-from app.core.constants import *
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from redis import asyncio as aioredis
+
+from fastapi import FastAPI
+from redis import asyncio as aioredis  # type: ignore[import]
+
+from app.core.constants import (
+    ID_FIELD,
+    REDIS_URL,
+    SORT_BY_FIELD,
+    SORT_TYPE_ASC,
+    SORT_TYPE_FIELD,
+)
+
 
 def get_params(params):
     """
     Extract and process query parameters for sorting and filtering.
-    
+
     This function extracts sort_by and sort_type parameters from the query params
     and returns them along with the remaining filter parameters.
-    
+
     Args:
         params (dict): Dictionary containing query parameters.
-        
+
     Returns:
         tuple: A tuple containing (sort_by, sort_type, filter_params) where:
             - sort_by (str): The field to sort by (defaults to 'id')
@@ -33,13 +41,11 @@ def get_params(params):
     params.pop(SORT_TYPE_FIELD, None)
     return sort_by, sort_type, params
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.redis = await aioredis.from_url(
-        REDIS_URL,
-        decode_responses=True
-    )
-    print('start:', app.state.redis)
+    app.state.redis = await aioredis.from_url(REDIS_URL, decode_responses=True)
+    print("start:", app.state.redis)
     yield
-    print('end:', app.state.redis)
+    print("end:", app.state.redis)
     await app.state.redis.close()

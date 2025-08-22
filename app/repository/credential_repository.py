@@ -1,15 +1,19 @@
-from app.models.credential import (
-    credential_collection, credential_data, credential_data_update, all_credential,
-    credential_data_response
-)
 from app.core.logger import CustomLogger
+from app.models.credentialModel import (
+    all_credential,
+    credential_collection,
+    credential_data,
+    credential_data_response,
+    credential_data_update,
+)
 
-logger = CustomLogger('credential_repository')
+logger = CustomLogger("credential_repository")
+
 
 class CredentialRepository:
     """
     CRUD operations handler for managing user credentials in the database.
-    
+
     This class provides methods to create, read, update, and soft-delete
     credentials associated with a specific user.
     """
@@ -39,17 +43,16 @@ class CredentialRepository:
         """
         try:
             response = credential_collection.insert_one(
-                credential_data(
-                    user_id, 
-                    credential
-                )
+                credential_data(user_id, credential)
             )
-            logger.info(f'Credential created successfully for user_id: {user_id}, credential data: {credential_data(user_id, credential)}, credential id: {response.inserted_id}')
+            logger.info(
+                f"Credential created successfully for user_id: {user_id}, credential data: {credential_data(user_id, credential)}, credential id: {response.inserted_id}"
+            )
             return str(response.inserted_id)
         except Exception as e:
-            logger.error(f'Error occurred while creating credential: {e}')
+            logger.error(f"Error occurred while creating credential: {e}")
             raise
-    
+
     def get_credential(self, user_id, credential_query):
         """
         Retrieve a single credential for a user that matches the given query.
@@ -66,18 +69,16 @@ class CredentialRepository:
         """
         try:
             response = credential_collection.find_one(
-                {
-                    **credential_query,
-                    'user_id': user_id,
-                    'is_deleted': False
-                }
+                {**credential_query, "user_id": user_id, "is_deleted": False}
             )
-            logger.info(f'Credential fetched successfully for user_id: {user_id}, credential query: {credential_query}')
+            logger.info(
+                f"Credential fetched successfully for user_id: {user_id}, credential query: {credential_query}"
+            )
             return self.credential_data_response(response)
         except Exception as e:
-            logger.error(f'Error occurred while getting credential: {e}')
+            logger.error(f"Error occurred while getting credential: {e}")
             raise
-    
+
     def get_all_credentials(self, user_id, search_value=None):
         """
         Retrieve all non-deleted credentials for a specific user.
@@ -93,35 +94,27 @@ class CredentialRepository:
             Exception: If an error occurs during the database query.
         """
         try:
-            search_query = {
-                'user_id': user_id, 
-                'is_deleted': False
-            }
+            search_query = {"user_id": user_id, "is_deleted": False}
+
             def get_filter_query(value):
                 return {
-                    '$or': [
-                        {
-                            'title': {
-                                '$regex': f'^{value}', 
-                                '$options': 'i'
-                            }
-                        },{
-                            'username': {
-                                '$regex': f'^{value}', 
-                                '$options': 'i'
-                            }
-                        }
+                    "$or": [
+                        {"title": {"$regex": f"^{value}", "$options": "i"}},
+                        {"username": {"$regex": f"^{value}", "$options": "i"}},
                     ]
                 }
+
             if search_value:
                 search_query.update(get_filter_query(search_value))
             response = credential_collection.find(search_query)
-            logger.info(f'All credentials fetched successfully for user_id: {user_id}, search value: {search_value}, credential count: {response.count()}')
+            logger.info(
+                f"All credentials fetched successfully for user_id: {user_id}, search value: {search_value}, credential count: {response.count()}"
+            )
             return self.all_credential(response)
         except Exception as e:
-            logger.error(f'Error occurred while getting all credentials: {e}')
+            logger.error(f"Error occurred while getting all credentials: {e}")
             raise
-    
+
     def update_credential(self, user_id, credential_id, credential):
         """
         Update an existing credential for a user.
@@ -139,19 +132,17 @@ class CredentialRepository:
         """
         try:
             response = credential_collection.update_one(
-                {
-                    '_id': credential_id, 
-                    'user_id': user_id
-                }, {
-                    '$set': credential_data_update(credential)
-                }
+                {"_id": credential_id, "user_id": user_id},
+                {"$set": credential_data_update(credential)},
             )
-            logger.info(f'Credential updated successfully for user_id: {user_id}, credential id: {credential_id}, credential data: {credential_data_update(credential)}')
+            logger.info(
+                f"Credential updated successfully for user_id: {user_id}, credential id: {credential_id}, credential data: {credential_data_update(credential)}"
+            )
             return response
         except Exception as e:
-            logger.error(f'Error occurred while updating credential: {e}')
+            logger.error(f"Error occurred while updating credential: {e}")
             raise
-    
+
     def delete_credential(self, user_id, credential_id):
         """
         Soft delete a credential by marking it as deleted.
@@ -168,15 +159,13 @@ class CredentialRepository:
         """
         try:
             response = credential_collection.update_one(
-                {
-                    '_id': credential_id, 
-                    'user_id': user_id
-                }, {
-                    '$set': {'is_deleted': True}
-                }
+                {"_id": credential_id, "user_id": user_id},
+                {"$set": {"is_deleted": True}},
             )
-            logger.info(f'Credential deleted successfully for user_id: {user_id}, credential id: {credential_id}')
+            logger.info(
+                f"Credential deleted successfully for user_id: {user_id}, credential id: {credential_id}"
+            )
             return response
         except Exception as e:
-            logger.error(f'Error occurred while deleting credential: {e}')
+            logger.error(f"Error occurred while deleting credential: {e}")
             raise
